@@ -31,9 +31,9 @@ type DB struct {
 
 // New creates a new database connection pool
 func New(cfg Config) (*DB, error) {
-	// Build connection string
+	// Build connection string with connect_timeout to prevent hanging
 	connStr := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s connect_timeout=5",
 		cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
 	)
 

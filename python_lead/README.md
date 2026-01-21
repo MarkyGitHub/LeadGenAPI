@@ -90,7 +90,7 @@ Dieser Service löst das so:
 ```bash
 # Repository klonen
 git clone <repository-url>
-cd lead-gateway-service
+cd python_lead
 
 # Alle Services starten
 docker-compose up -d
@@ -309,6 +309,7 @@ Die Datei `config/customer_attribute_mapping.json` definiert das Mapping:
 ### Alle Tests
 
 ```bash
+cd python_lead
 pytest
 pytest -v
 pytest --cov=leads
@@ -329,6 +330,7 @@ docker-compose -f docker-compose.yml -f docker-compose.e2e.yml up -d --build
 2) Live‑E2E‑Tests starten (Windows cmd):
 
 ```bash
+cd python_lead
 set LIVE_E2E=1
 pytest leads\tests\test_e2e_live_async.py
 ```

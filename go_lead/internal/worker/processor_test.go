@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -16,6 +17,8 @@ import (
 
 // setupTestProcessor creates a processor with test dependencies
 func setupTestProcessor(t *testing.T) (*Processor, func()) {
+	ensureTestDBEnv()
+
 	// Load test configuration
 	cfg, err := config.Load()
 	if err != nil {
@@ -78,6 +81,15 @@ func setupTestProcessor(t *testing.T) (*Processor, func()) {
 	}
 
 	return processor, cleanup
+}
+
+func ensureTestDBEnv() {
+	if _, ok := os.LookupEnv("DB_PORT"); ok {
+		return
+	}
+	if testPort, ok := os.LookupEnv("TEST_DB_PORT"); ok {
+		_ = os.Setenv("DB_PORT", testPort)
+	}
 }
 
 // TestProcessLead_SuccessfulProcessing tests the successful processing flow
