@@ -1,0 +1,129 @@
+﻿{
+  "solar_energy_consumption": {
+    "attribute_type": "text",
+    "is_numeric": true,
+    "values": null
+  },
+  "solar_monthly_electricity_bill": {
+    "attribute_type": "text",
+    "is_numeric": true,
+    "values": null
+  },
+  "solar_offer_type": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": ["Beides interessant", "Mieten", "Kaufen"]
+  },
+  "solar_owner": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": ["Ja", "Nein", "In Auftrag"]
+  },
+  "solar_power_storage": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": ["Ja", "Nein", "Noch nicht sicher"]
+  },
+  "solar_property_type": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Einfamilienhaus",
+      "Zweifamilienhaus",
+      "Mehrfamilienhaus",
+      "Firmengebäude",
+      "Freilandfläche",
+      "Garage",
+      "Carport",
+      "Scheune/Landwirtschaft",
+      "Lagerhalle",
+      "Industrie"
+    ]
+  },
+  "solar_roof_age": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Erst in Planung",
+      "Gerade erst gebaut",
+      "Jünger als 30 Jahre",
+      "Älter als 30 Jahre"
+    ]
+  },
+  "solar_roof_condition": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Asbestbelastet",
+      "Frisch renoviert",
+      "Guter Zustand",
+      "In Ordnung",
+      "Renovierungsbedürftig",
+      "Neubau"
+    ]
+  },
+  "solar_roof_material": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Asbest",
+      "Bitumen",
+      "Blech/Trapezblech",
+      "Dachziegel",
+      "Gründach",
+      "Holzdach",
+      "Kies",
+      "Schiefer",
+      "Schindeldach",
+      "Andere"
+    ]
+  },
+  "solar_roof_type": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Andere",
+      "Flachdach",
+      "Kaffeemühlenhaus",
+      "Krüppelwalmdach",
+      "Mansardendach",
+      "Pultdach",
+      "Satteldach",
+      "Versetztes Pultdach",
+      "Walmdach",
+      "Winkelwalmdach",
+      "Zwerchdach"
+    ]
+  },
+  "solar_south_location": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Ja",
+      "Nein",
+      "Teilweise",
+      "Nicht sicher",
+      "Keine (Flachdach)",
+      "Süd",
+      "Süd-West",
+      "Süd-Ost",
+      "West",
+      "Ost"
+    ]
+  },
+  "solar_usage": {
+    "attribute_type": "dropdown",
+    "is_numeric": false,
+    "values": [
+      "Eigenverbrauch",
+      "Netzeinspeisung",
+      "Netzeinspeisung und Eigenverbrauch"
+    ]
+  },
+  "source": { "attribute_type": "text", "is_numeric": false, "values": [] },
+  "solar_area": {
+    "attribute_type": "range",
+    "is_numeric": true,
+    "values": null
+  }
+}

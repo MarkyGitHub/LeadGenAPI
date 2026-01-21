@@ -1,0 +1,147 @@
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:15-alpine
+    container_name: go_lead_postgres
+    environment:
+      POSTGRES_DB: lead_gateway
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432" # Using 5433 to avoid conflict with existing postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - go_lead_network
+
+  # Redis for job queue
+  redis:
+    image: redis:7-alpine
+    container_name: go_lead_redis
+    ports:
+      - "6380:6379" # Using 6380 to avoid conflict with existing redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - go_lead_network
+
+  # Go API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    container_name: go_lead_api
+    ports:
+      - "8080:8080"
+    environment:
+      # Database Configuration
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=lead_gateway
+      - DB_SSLMODE=disable
+
+      # API Server Configuration
+      - API_PORT=8080
+      - API_HOST=0.0.0.0
+
+      # Queue Configuration
+      - QUEUE_TYPE=redis
+      - REDIS_URL=redis://redis:6379/0
+
+      # Customer API Configuration
+      - CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
+      - CUSTOMER_API_TOKEN=FakeCustomerToken
+      - CUSTOMER_API_TIMEOUT=30s
+      - CUSTOMER_PRODUCT_NAME=Solaranlage
+
+      # Retry Configuration
+      - MAX_RETRY_ATTEMPTS=5
+      - RETRY_BACKOFF_BASE=30s
+
+      # Authentication (Optional)
+      - ENABLE_AUTH=false
+      - SHARED_SECRET=your_shared_secret_here
+
+      # Logging
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+
+      # Attribute Mapping Configuration
+      - ATTRIBUTE_MAPPING_FILE=./config/customer_attribute_mapping.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - go_lead_network
+    restart: unless-stopped
+
+  # Go Background Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+    container_name: go_lead_worker
+    environment:
+      # Database Configuration
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=lead_gateway
+      - DB_SSLMODE=disable
+
+      # Worker Configuration
+      - WORKER_POLL_INTERVAL=5s
+      - WORKER_CONCURRENCY=5
+
+      # Queue Configuration
+      - QUEUE_TYPE=redis
+      - REDIS_URL=redis://redis:6379/0
+
+      # Customer API Configuration
+      - CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
+      - CUSTOMER_API_TOKEN=FakeCustomerToken
+      - CUSTOMER_API_TIMEOUT=30s
+      - CUSTOMER_PRODUCT_NAME=Solaranlage
+
+      # Retry Configuration
+      - MAX_RETRY_ATTEMPTS=5
+      - RETRY_BACKOFF_BASE=30s
+
+      # Logging
+      - LOG_LEVEL=info
+      - LOG_FORMAT=json
+
+      # Attribute Mapping Configuration
+      - ATTRIBUTE_MAPPING_FILE=./config/customer_attribute_mapping.json
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - go_lead_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  go_lead_network:
+    driver: bridge

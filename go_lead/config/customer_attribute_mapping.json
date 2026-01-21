@@ -1,0 +1,170 @@
+{
+    "_comment": "Customer Attribute Mapping Configuration",
+    "_description": "Defines validation rules for lead attributes. Attributes are validated against these rules during transformation. Invalid optional attributes are omitted (permissive handling).",
+    "_attribute_types": {
+        "text": "Free-form text field (optionally numeric)",
+        "dropdown": "Must match one of the specified values exactly",
+        "range": "Numeric value within a range"
+    },
+    "_validation_behavior": {
+        "required_fields": "phone and product.name are required. Missing values cause FAILED status.",
+        "optional_attributes": "Invalid values are omitted from customer payload (permissive handling)."
+    },
+    "solar_energy_consumption": {
+        "attribute_type": "text",
+        "is_numeric": true,
+        "values": null,
+        "description": "Annual energy consumption in kWh"
+    },
+    "solar_monthly_electricity_bill": {
+        "attribute_type": "text",
+        "is_numeric": true,
+        "values": null,
+        "description": "Monthly electricity bill amount"
+    },
+    "solar_offer_type": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Beides interessant",
+            "Mieten",
+            "Kaufen"
+        ],
+        "description": "Type of solar offer (Both, Rent, Buy)"
+    },
+    "solar_owner": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Ja",
+            "Nein",
+            "In Auftrag"
+        ],
+        "description": "Solar panel ownership status (Yes, No, In Progress)"
+    },
+    "solar_power_storage": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Ja",
+            "Nein",
+            "Noch nicht sicher"
+        ],
+        "description": "Power storage interest (Yes, No, Not sure yet)"
+    },
+    "solar_property_type": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Einfamilienhaus",
+            "Zweifamilienhaus",
+            "Mehrfamilienhaus",
+            "Firmengebäude",
+            "Freilandfläche",
+            "Garage",
+            "Carport",
+            "Scheune/Landwirtschaft",
+            "Lagerhalle",
+            "Industrie"
+        ],
+        "description": "Property type (Single-family house, Two-family house, Multi-family house, Commercial building, Open land, Garage, Carport, Barn/Agriculture, Warehouse, Industrial)"
+    },
+    "solar_roof_age": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Erst in Planung",
+            "Gerade erst gebaut",
+            "Jünger als 30 Jahre",
+            "Älter als 30 Jahre"
+        ],
+        "description": "Roof age (In planning, Just built, Younger than 30 years, Older than 30 years)"
+    },
+    "solar_roof_condition": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Asbestbelastet",
+            "Frisch renoviert",
+            "Guter Zustand",
+            "In Ordnung",
+            "Renovierungsbedürftig",
+            "Neubau"
+        ],
+        "description": "Roof condition (Asbestos-contaminated, Freshly renovated, Good condition, Okay, Needs renovation, New construction)"
+    },
+    "solar_roof_material": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Asbest",
+            "Bitumen",
+            "Blech/Trapezblech",
+            "Dachziegel",
+            "Gründach",
+            "Holzdach",
+            "Kies",
+            "Schiefer",
+            "Schindeldach",
+            "Andere"
+        ],
+        "description": "Roof material (Asbestos, Bitumen, Metal/Trapezoidal sheet, Roof tiles, Green roof, Wooden roof, Gravel, Slate, Shingle roof, Other)"
+    },
+    "solar_roof_type": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Andere",
+            "Flachdach",
+            "Kaffeemühlenhaus",
+            "Krüppelwalmdach",
+            "Mansardendach",
+            "Pultdach",
+            "Satteldach",
+            "Versetztes Pultdach",
+            "Walmdach",
+            "Winkelwalmdach",
+            "Zwerchdach"
+        ],
+        "description": "Roof type (Other, Flat roof, Coffee mill house, Hipped gable roof, Mansard roof, Shed roof, Gable roof, Offset shed roof, Hipped roof, Angled hipped roof, Gable roof with dormer)"
+    },
+    "solar_south_location": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Ja",
+            "Nein",
+            "Teilweise",
+            "Nicht sicher",
+            "Keine (Flachdach)",
+            "Süd",
+            "Süd-West",
+            "Süd-Ost",
+            "West",
+            "Ost"
+        ],
+        "description": "South-facing location (Yes, No, Partially, Not sure, None (flat roof), South, South-West, South-East, West, East)"
+    },
+    "solar_usage": {
+        "attribute_type": "dropdown",
+        "is_numeric": false,
+        "values": [
+            "Eigenverbrauch",
+            "Netzeinspeisung",
+            "Netzeinspeisung und Eigenverbrauch"
+        ],
+        "description": "Solar usage type (Self-consumption, Grid feed-in, Grid feed-in and self-consumption)"
+    },
+    "source": {
+        "attribute_type": "text",
+        "is_numeric": false,
+        "values": [],
+        "description": "Lead source identifier"
+    },
+    "solar_area": {
+        "attribute_type": "range",
+        "is_numeric": true,
+        "values": null,
+        "description": "Available roof area in square meters"
+    }
+}
