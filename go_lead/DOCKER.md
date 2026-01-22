@@ -221,7 +221,8 @@ REDIS_URL=redis://redis:6379/0 # Redis connection URL (use service name in Docke
 #### Customer API Configuration
 
 ```bash
-CUSTOMER_API_URL=https://api.customer.example.com  # Customer API endpoint URL
+CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
+CUSTOMER_API_TOKEN=FakeCustomerToken  # Customer API endpoint URL
 CUSTOMER_API_TOKEN=your_bearer_token_here          # Bearer token for authentication
 CUSTOMER_API_TIMEOUT=30s                           # Request timeout (e.g., 10s, 30s, 60s)
 CUSTOMER_PRODUCT_NAME=solar_panel_installation     # Product name to send to Customer API

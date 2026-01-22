@@ -272,7 +272,8 @@ REDIS_URL=redis://localhost:6379/0  # Redis-Verbindungs-URL
 #### Customer API Konfiguration
 
 ```bash
-CUSTOMER_API_URL=https://api.customer.example.com  # Customer API Endpunkt
+CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
+CUSTOMER_API_TOKEN=FakeCustomerToken  # Customer API Endpunkt
 CUSTOMER_API_TOKEN=your_bearer_token_here          # Bearer Token für Auth
 CUSTOMER_API_TIMEOUT=30s                           # Request-Timeout
 CUSTOMER_PRODUCT_NAME=solar_panel_installation     # Produktname
