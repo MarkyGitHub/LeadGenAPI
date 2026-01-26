@@ -3,6 +3,7 @@ API views for Lead Gateway Service.
 """
 import logging
 import uuid
+from rest_framework.exceptions import ParseError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -91,6 +92,18 @@ class LeadWebhookView(APIView):
                 status=status.HTTP_200_OK
             )
             
+        except ParseError as e:
+            logger.warning(
+                f"Malformed JSON payload: {e}, "
+                f"correlation_id={correlation_id}"
+            )
+            return Response(
+                {
+                    'error': 'Malformed JSON',
+                    'correlation_id': correlation_id
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             logger.error(
                 f"Error processing webhook request: {e}, "

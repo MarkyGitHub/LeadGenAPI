@@ -45,7 +45,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
-      - CUSTOMER_TOKEN=FakeCustomerToken
+      - CUSTOMER_TOKEN=Bearer FakeCustomerToken
       - CUSTOMER_PRODUCT_NAME=Solaranlage
     depends_on:
       db:
@@ -69,7 +69,7 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CUSTOMER_API_URL=https://contactapi.static.fyi/lead/receive/fake/USER_ID/
-      - CUSTOMER_TOKEN=FakeCustomerToken
+      - CUSTOMER_TOKEN=Bearer FakeCustomerToken
       - CUSTOMER_PRODUCT_NAME=Solaranlage
     depends_on:
       db:

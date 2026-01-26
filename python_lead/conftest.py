@@ -37,7 +37,7 @@ def pytest_configure(config):
             CELERY_TASK_EAGER_PROPAGATES=True,
             # Customer API settings
             CUSTOMER_API_URL='https://contactapi.static.fyi/lead/receive/fake/USER_ID/',
-            CUSTOMER_TOKEN='FakeCustomerToken',
+            CUSTOMER_TOKEN='Bearer FakeCustomerToken',
             CUSTOMER_PRODUCT_NAME='Solaranlage',
             ATTRIBUTE_MAPPING_PATH='customer_attribute_mapping.json',
         )

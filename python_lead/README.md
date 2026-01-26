@@ -115,7 +115,7 @@ docker-compose down -v
 ---
 ```
 
-Der Service ist unter `http://localhost:8000` erreichbar.
+Der Service ist unter `http://localhost:8004` erreichbar.
 
 ### Lokale Instellation (ohne Docker)
 
@@ -194,10 +194,11 @@ X-Shared-Secret: <optional_auth_token>  # falls Auth aktiv ist
 ### Beispiel
 
 ```bash
-curl -X POST http://localhost:8000/webhooks/leads/ \
+curl -X POST http://localhost:8004/webhooks/leads/ \
   -H "Content-Type: application/json" \
   -d '{
     "email": "john.doe@example.com",
+    "phone": "0123456",
     "address": {
       "zip": "66123",
       "street": "123 Main St"
@@ -206,6 +207,25 @@ curl -X POST http://localhost:8000/webhooks/leads/ \
       "is_owner": true
     }
   }'
+```
+
+**Windows PowerShell (sicherer Aufruf):**
+
+```powershell
+$payload = @'
+{
+  "email": "john.doe@example.com",
+  "phone": "0123456",
+  "address": {
+    "zip": "66123",
+    "street": "123 Main St"
+  },
+  "house": {
+    "is_owner": true
+  }
+}
+'@
+Invoke-RestMethod -Uri "http://localhost:8004/webhooks/leads/" -Method Post -ContentType "application/json" -Body $payload
 ```
 
 ## Lead‑Pipeline
@@ -270,7 +290,7 @@ Leads müssen alle Regeln bestehen:
 | `POSTGRES_PORT`         | DB‑Port                         | `5432`                   |
 | `CELERY_BROKER_URL`     | Redis‑URL                       | `redis://localhost:6379/0` |
 | `CUSTOMER_API_URL`      | Kunden‑Endpoint                 | `https://contactapi.static.fyi/lead/receive/fake/USER_ID` |
-| `CUSTOMER_TOKEN`        | Bearer‑Token                    | `FakeCustomerToken`      |
+| `CUSTOMER_TOKEN`        | Bearer‑Token                    | `Bearer FakeCustomerToken` |
 | `CUSTOMER_PRODUCT_NAME` | Produktname                     | `Solaranlage`            |
 | `ATTRIBUTE_MAPPING_PATH`| Pfad zur Mapping‑Datei          | `customer_attribute_mapping.json` |
 | `WEBHOOK_SHARED_SECRET` | Optionales Shared‑Secret        | `None`                   |

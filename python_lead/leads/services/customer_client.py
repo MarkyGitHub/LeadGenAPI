@@ -36,7 +36,7 @@ def send_to_customer(payload: dict) -> httpx.Response:
     logger.debug("Customer API token=%s", token)
     
     headers = {
-        'Authorization': f'Bearer {token}',
+        'Authorization': f'{token}',
         'Content-Type': 'application/json',
     }
 

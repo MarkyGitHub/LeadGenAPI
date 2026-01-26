@@ -49,7 +49,7 @@ class TestWebhookE2E:
         call_args, call_kwargs = mock_httpx_post.call_args
         url = call_kwargs.get("url") or (call_args[0] if call_args else None)
         assert url == settings.CUSTOMER_API_URL
-        assert call_kwargs["headers"]["Authorization"] == f"Bearer {settings.CUSTOMER_TOKEN}"
+        assert call_kwargs["headers"]["Authorization"] == f"{settings.CUSTOMER_TOKEN}"
         assert call_kwargs["headers"]["Content-Type"] == "application/json"
         assert call_kwargs["json"]["phone"] == valid_lead_payload["phone"]
         assert call_kwargs["json"]["product"]["name"] == settings.CUSTOMER_PRODUCT_NAME
