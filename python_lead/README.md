@@ -262,52 +262,6 @@ tunnels:
     auth: "username:password"
 ```
 
-### Tipps & Best Practices
-
-** Sicherheit:**
-- Die kostenlose Version von ngrok ändert die URL bei jedem Neustart
-- Verwende Basic Auth für zusätzlichen Schutz (siehe `ngrok.yml`)
-- Nutze die `X-Shared-Secret` Header-Validierung der App
-
-** Performance:**
-- ngrok fügt ~50-100ms Latenz hinzu (akzeptabel für Entwicklung)
-- Für Produktion: Verwende eine echte Domain mit SSL
-
-** Debugging:**
-- Prüfe http://localhost:4040 für Request-Details
-- Replay-Funktion spart Zeit beim Testen
-- Exportiere Requests als curl-Befehle
-
-** Alternative zu ngrok:**
-- localtunnel: `npx localtunnel --port 8004`
-- VS Code Port Forwarding (wenn du GitHub Codespaces nutzt)
-- Cloudflare Tunnel: `cloudflared tunnel`
-
-### Beispiel: Lead senden über ngrok
-
-```bash
-# Ersetze die URL mit deiner ngrok-URL
-curl -X POST https://abcd1234.ngrok.io/webhooks/leads/ \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "test@example.com",
-    "phone": "0160 8912308",
-    "zipcode": "53859",
-    "street": "Main Street 1",
-    "city": "Niederkassel",
-    "first_name": "Test",
-    "last_name": "User",
-    "questions": {
-      "Sind Sie Eigentümer der Immobilie?": "Ja"
-    }
-  }'
-```
-
-Dann prüfe:
-1. ngrok Web-UI (http://localhost:4040) für Request-Details
-2. Django Logs für Verarbeitung
-3. Celery Logs für asynchrone Task-Ausführung
-
 ## API‑Referenz
 
 ### POST /webhooks/leads/
@@ -325,16 +279,31 @@ X-Shared-Secret: <optional_auth_token>  # falls Auth aktiv ist
 
 ```json
 {
-  "email": "user@example.com",
-  "phone": "0160 8912308",
-  "zipcode": "53859",
-  "street": "Ommerich Str 119",
-  "city": "Niederkassel",
-  "first_name": "Rainer",
-  "last_name": "Simossek",
+  "city": "Niesky",
+  "email": "lotharhalke@web.de",
+  "phone": "0172 9317474",
+  "street": "Bautzenerstrasse 9",
+  "comment": "",
+  "zipcode": "02906",
+  "last_name": "Halke",
+  "lead_type": "phone",
   "questions": {
-    "Sind Sie Eigentümer der Immobilie?": "Ja"
-  }
+    "Dachfläche": "60",
+    "Dachgefälle": "15",
+    "Dachmaterial": "Dachpappe / Bitumen",
+    "Finanzierung": "Nicht sicher",
+    "Dachausrichtung": "West",
+    "Wallbox gewünscht": "Nein",
+    "Wie alt ist Ihr Dach?": "Nach 1990",
+    "Stromspeicher gewünscht": "Nein",
+    "Sind Sie Eigentümer der Immobilie?": "Ja",
+    "Wann soll das Projekt gestartet werden?": "6",
+    "Welche Dachform haben Sie auf Ihrem Haus?": "Flachdach",
+    "Wie hoch schätzen Sie ihren Stromverbrauch?": "2000",
+    "Wo möchten Sie die Solaranlage installieren?": "Einfamilienhaus"
+  },
+  "created_at": 1751005815,
+  "first_name": "Lothar"
 }
 ```
 
@@ -363,17 +332,32 @@ X-Shared-Secret: <optional_auth_token>  # falls Auth aktiv ist
 curl -X POST http://localhost:8004/webhooks/leads/ \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "john.doe@example.com",
-    "phone": "0160 8912308",
-    "zipcode": "53859",
-    "street": "Ommerich Str 119",
-    "city": "Niederkassel",
-    "first_name": "John",
-    "last_name": "Doe",
-    "questions": {
-      "Sind Sie Eigentümer der Immobilie?": "Ja"
-    }
-  }'
+  "city": "Niesky",
+  "email": "lotharhalke@web.de",
+  "phone": "0172 9317474",
+  "street": "Bautzenerstrasse 9",
+  "comment": "",
+  "zipcode": "02906",
+  "last_name": "Halke",
+  "lead_type": "phone",
+  "questions": {
+    "Dachfläche": "60",
+    "Dachgefälle": "15",
+    "Dachmaterial": "Dachpappe / Bitumen",
+    "Finanzierung": "Nicht sicher",
+    "Dachausrichtung": "West",
+    "Wallbox gewünscht": "Nein",
+    "Wie alt ist Ihr Dach?": "Nach 1990",
+    "Stromspeicher gewünscht": "Nein",
+    "Sind Sie Eigentümer der Immobilie?": "Ja",
+    "Wann soll das Projekt gestartet werden?": "6",
+    "Welche Dachform haben Sie auf Ihrem Haus?": "Flachdach",
+    "Wie hoch schätzen Sie ihren Stromverbrauch?": "2000",
+    "Wo möchten Sie die Solaranlage installieren?": "Einfamilienhaus"
+  },
+  "created_at": 1751005815,
+  "first_name": "Lothar"
+}'
 ```
 
 **Windows PowerShell (sicherer Aufruf):**
@@ -381,16 +365,31 @@ curl -X POST http://localhost:8004/webhooks/leads/ \
 ```powershell
 $payload = @'
 {
-  "email": "john.doe@example.com",
-  "phone": "0160 8912308",
-  "zipcode": "53859",
-  "street": "Ommerich Str 119",
-  "city": "Niederkassel",
-  "first_name": "John",
-  "last_name": "Doe",
+  "city": "Niesky",
+  "email": "lotharhalke@web.de",
+  "phone": "0172 9317474",
+  "street": "Bautzenerstrasse 9",
+  "comment": "",
+  "zipcode": "02906",
+  "last_name": "Halke",
+  "lead_type": "phone",
   "questions": {
-    "Sind Sie Eigentümer der Immobilie?": "Ja"
-  }
+    "Dachfläche": "60",
+    "Dachgefälle": "15",
+    "Dachmaterial": "Dachpappe / Bitumen",
+    "Finanzierung": "Nicht sicher",
+    "Dachausrichtung": "West",
+    "Wallbox gewünscht": "Nein",
+    "Wie alt ist Ihr Dach?": "Nach 1990",
+    "Stromspeicher gewünscht": "Nein",
+    "Sind Sie Eigentümer der Immobilie?": "Ja",
+    "Wann soll das Projekt gestartet werden?": "6",
+    "Welche Dachform haben Sie auf Ihrem Haus?": "Flachdach",
+    "Wie hoch schätzen Sie ihren Stromverbrauch?": "2000",
+    "Wo möchten Sie die Solaranlage installieren?": "Einfamilienhaus"
+  },
+  "created_at": 1751005815,
+  "first_name": "Lothar"
 }
 '@
 Invoke-RestMethod -Uri "http://localhost:8004/webhooks/leads/" -Method Post -ContentType "application/json" -Body $payload
