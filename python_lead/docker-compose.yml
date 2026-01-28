@@ -37,6 +37,7 @@ services:
       - "8004:8000"
     environment:
       - DEBUG=True
+      - ALLOWED_HOSTS=localhost,127.0.0.1,.ngrok-free.app,.ngrok.io
       - DB_NAME=lead_gateway
       - DB_USER=postgres
       - DB_PASSWORD=postgres
@@ -76,6 +77,25 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  # ngrok tunnel (optional - for exposing local webhooks to external services)
+  # Uncomment this service if you want to run ngrok in Docker
+  # You'll need to set NGROK_AUTHTOKEN environment variable
+  # ngrok:
+  #   image: ngrok/ngrok:latest
+  #   command: 
+  #     - "start"
+  #     - "--all"
+  #     - "--config"
+  #     - "/etc/ngrok.yml"
+  #   volumes:
+  #     - ./ngrok.yml:/etc/ngrok.yml:ro
+  #   environment:
+  #     - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+  #   ports:
+  #     - "4040:4040"  # ngrok web interface
+  #   depends_on:
+  #     - web
 
 volumes:
   postgres_data:

@@ -48,7 +48,8 @@ def normalize(payload: dict) -> dict:
     Operations:
     - Lowercase and trim email addresses
     - Trim whitespace from all string fields
-    - Convert boolean strings ('true', 'false') to actual booleans
+    - Preserve questions object as-is (don't modify values)
+    - Convert 'Ja'/'Nein' to canonical form
     
     Args:
         payload: Raw lead data
@@ -59,8 +60,19 @@ def normalize(payload: dict) -> dict:
     if not payload:
         return {}
     
-    # First, normalize all values recursively
-    normalized = normalize_dict(payload)
+    # First, normalize all values recursively (except questions)
+    normalized = {}
+    for key, value in payload.items():
+        if key == 'questions' and isinstance(value, dict):
+            # Preserve questions as-is, don't normalize keys or values
+            normalized[key] = value
+        elif isinstance(value, dict):
+            normalized[key] = normalize_dict(value)
+        elif isinstance(value, list):
+            normalized[key] = [normalize_value(item) if not isinstance(item, dict) 
+                              else normalize_dict(item) for item in value]
+        else:
+            normalized[key] = normalize_value(value)
     
     # Special handling for email: lowercase
     if 'email' in normalized and isinstance(normalized['email'], str):

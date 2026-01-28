@@ -16,13 +16,17 @@ class TestProcessLeadHappyPath:
     @patch('leads.tasks.send_to_customer')
     def test_successful_end_to_end_flow(self, mock_send):
         """Test successful flow: RECEIVED → READY → DELIVERED."""
-        # Create a valid lead
+        # Create a valid lead with new payload structure
         lead = InboundLead.objects.create(
             raw_payload={
-                'email': 'test@example.com',
-                'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'city': 'Niederkassel',
+                'email': 'rainer.simossek@t-online.de',
+                'phone': '0160 8912308',
+                'street': 'Ommerich Str 119',
+                'zipcode': '53859',
+                'last_name': 'Simossek',
+                'first_name': 'Rainer',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -58,10 +62,14 @@ class TestProcessLeadValidationFailures:
         """Test lead with invalid zipcode is REJECTED."""
         lead = InboundLead.objects.create(
             raw_payload={
-                'email': 'test@example.com',
-                'phone': '+49123456789',
-                'address': {'zip': '12345', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'city': 'Niederkassel',
+                'email': 'rainer.simossek@t-online.de',
+                'phone': '0160 8912308',
+                'street': 'Ommerich Str 119',
+                'zipcode': '12345',  # Invalid: not 53XXX
+                'last_name': 'Simossek',
+                'first_name': 'Rainer',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -70,17 +78,21 @@ class TestProcessLeadValidationFailures:
         
         lead.refresh_from_db()
         assert lead.status == InboundLead.Status.REJECTED
-        assert 'ZIP_NOT_66XXX' in lead.rejection_reason
+        assert 'ZIPCODE_INVALID' in lead.rejection_reason
         assert lead.delivery_attempts.count() == 0
     
     def test_non_homeowner_rejected(self):
-        """Test lead with is_owner=False is REJECTED."""
+        """Test lead with is_owner != 'Ja' is REJECTED."""
         lead = InboundLead.objects.create(
             raw_payload={
-                'email': 'test@example.com',
-                'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': False}
+                'city': 'Niederkassel',
+                'email': 'rainer.simossek@t-online.de',
+                'phone': '0160 8912308',
+                'street': 'Ommerich Str 119',
+                'zipcode': '53859',
+                'last_name': 'Simossek',
+                'first_name': 'Rainer',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Nein'}  # Invalid
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -99,16 +111,19 @@ class TestProcessLeadTransformationFailures:
     
     @patch('leads.tasks.settings')
     def test_missing_phone_fails(self, mock_settings):
-        """Test lead with missing phone is marked FAILED."""
+        """Test lead with missing phone is marked REJECTED."""
         mock_settings.CUSTOMER_PRODUCT_NAME = 'Solar'
         mock_settings.ATTRIBUTE_MAPPING_PATH = 'customer_attribute_mapping.json'
         
         lead = InboundLead.objects.create(
             raw_payload={
                 'email': 'test@example.com',
-                # Missing phone
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -116,8 +131,8 @@ class TestProcessLeadTransformationFailures:
         process_lead(lead.id)
         
         lead.refresh_from_db()
-        assert lead.status == InboundLead.Status.FAILED
-        assert 'phone' in lead.rejection_reason.lower()
+        assert lead.status == InboundLead.Status.REJECTED
+        assert lead.rejection_reason == 'MISSING_REQUIRED_FIELD'
         assert lead.delivery_attempts.count() == 0
     
     @patch('leads.tasks.settings')
@@ -130,8 +145,12 @@ class TestProcessLeadTransformationFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -163,9 +182,13 @@ class TestProcessLeadTransformationFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True},
-                'solar_owner': 'InvalidValue'  # Invalid attribute
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'},
+                'solar_owner': 'InvalidValue'
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -188,8 +211,12 @@ class TestProcessLeadDeliveryFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -215,8 +242,12 @@ class TestProcessLeadDeliveryFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -240,8 +271,12 @@ class TestProcessLeadDeliveryFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -267,8 +302,12 @@ class TestProcessLeadDeliveryFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -293,8 +332,12 @@ class TestProcessLeadDeliveryFailures:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -322,8 +365,12 @@ class TestProcessLeadRetryExhaustion:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -360,8 +407,12 @@ class TestProcessLeadDeliveryAttempts:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -389,8 +440,12 @@ class TestProcessLeadDeliveryAttempts:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -416,8 +471,12 @@ class TestProcessLeadDeliveryAttempts:
             raw_payload={
                 'email': 'test@example.com',
                 'phone': '+49123456789',
-                'address': {'zip': '66123', 'street': '123 Main St'},
-                'house': {'is_owner': True}
+                'zipcode': '53859',
+                'street': '123 Main St',
+                'city': 'Berlin',
+                'first_name': 'John',
+                'last_name': 'Doe',
+                'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
             },
             status=InboundLead.Status.RECEIVED
         )
@@ -434,3 +493,4 @@ class TestProcessLeadDeliveryAttempts:
         assert attempt.response_status is None
         assert attempt.success is False
         assert 'timeout' in attempt.error_message.lower()
+

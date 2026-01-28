@@ -9,3 +9,11 @@
 /.vscode/
 /.hypothesis/.
 /.pytest_cache/
+
+# ngrok
+ngrok
+ngrok.exe
+ngrok.log
+*.ngrok.log
+.ngrok2/
+

@@ -34,3 +34,11 @@ dist/
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# ngrok
+ngrok
+ngrok.exe
+ngrok.log
+*.ngrok.log
+.ngrok2/
+

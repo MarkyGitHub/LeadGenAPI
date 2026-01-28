@@ -27,12 +27,18 @@ class TestLeadWebhookView:
         mock_lead_model.objects.create.return_value = mock_lead
         mock_lead_model.Status = InboundLead.Status  # Use real Status enum
         
-        # Create request
+        # Create request with new payload structure
         payload = {
-            'email': 'test@example.com',
-            'phone': '+49123456789',
-            'address': {'zip': '66123', 'street': '123 Main St'},
-            'house': {'is_owner': True}
+            'city': 'Niederkassel',
+            'email': 'rainer.simossek@t-online.de',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'comment': '',
+            'zipcode': '53859',
+            'last_name': 'Simossek',
+            'lead_type': 'phone',
+            'first_name': 'Rainer',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         request = self.factory.post(
             '/webhooks/leads/',
@@ -111,12 +117,16 @@ class TestLeadWebhookView:
         mock_lead.id = 456
         mock_lead_model.objects.create.return_value = mock_lead
         
-        # Create request
+        # Create request with new payload structure
         payload = {
-            'email': 'test@example.com',
-            'phone': '+49123456789',
-            'address': {'zip': '66123'},
-            'house': {'is_owner': True}
+            'city': 'Niederkassel',
+            'email': 'rainer.simossek@t-online.de',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'zipcode': '53859',
+            'last_name': 'Simossek',
+            'first_name': 'Rainer',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         request = self.factory.post(
             '/webhooks/leads/',

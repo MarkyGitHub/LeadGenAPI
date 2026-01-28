@@ -1,0 +1,34 @@
+# ngrok configuration file for Go Lead Gateway
+# This file should be placed in your ngrok config directory or used with --config flag
+# 
+# Usage: ngrok start --all --config=ngrok.yml
+# Or: ngrok http 8000 --config=ngrok.yml
+
+version: "2"
+
+# Uncomment and add your authtoken after running: ngrok config add-authtoken YOUR_TOKEN
+# authtoken: YOUR_NGROK_TOKEN
+
+tunnels:
+  go-webhook:
+    proto: http
+    addr: 8000
+    # Optional: Set a custom subdomain (requires ngrok paid plan)
+    # subdomain: my-go-lead-gateway
+    
+    # Optional: Add basic auth for extra security
+    # auth: "username:password"
+    
+    # Optional: Request inspection
+    inspect: true
+    
+    # Optional: Custom domain (requires ngrok paid plan)
+    # hostname: leads.example.com
+
+# Web interface for inspecting requests
+web_addr: 127.0.0.1:4041
+
+# Log configuration
+log_level: info
+log_format: json
+# log: ngrok.log

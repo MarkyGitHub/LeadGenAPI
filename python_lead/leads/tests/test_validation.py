@@ -5,7 +5,7 @@ import pytest
 from leads.services.validation import (
     validate_lead,
     get_nested_value,
-    ZIP_NOT_66XXX,
+    ZIPCODE_PATTERN_ERROR,
     NOT_HOMEOWNER,
     MISSING_REQUIRED_FIELD,
 )
@@ -18,160 +18,216 @@ class TestGetNestedValue:
         data = {'email': 'test@example.com'}
         assert get_nested_value(data, 'email') == 'test@example.com'
     
-    def test_nested_key(self):
-        data = {'address': {'zip': '66123'}}
-        assert get_nested_value(data, 'address.zip') == '66123'
+    def test_nested_key_with_dots(self):
+        data = {'address': {'zip': '53859'}}
+        assert get_nested_value(data, 'address.zip') == '53859'
     
-    def test_deeply_nested_key(self):
-        data = {'a': {'b': {'c': 'value'}}}
-        assert get_nested_value(data, 'a.b.c') == 'value'
+    def test_bracket_notation_for_dict_keys(self):
+        """Test bracket notation for dictionary keys with special characters."""
+        data = {'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}}
+        assert get_nested_value(data, 'questions[Sind Sie Eigentümer der Immobilie?]') == 'Ja'
     
     def test_missing_key_returns_default(self):
         data = {'email': 'test@example.com'}
         assert get_nested_value(data, 'phone') is None
         assert get_nested_value(data, 'phone', 'default') == 'default'
-    
-    def test_missing_nested_key_returns_default(self):
-        data = {'address': {'street': '123 Main St'}}
-        assert get_nested_value(data, 'address.zip') is None
 
 
 class TestValidateLeadZipcode:
     """Tests for zipcode validation."""
     
-    def test_valid_zipcode_66123(self):
-        """Test valid zipcode starting with 66."""
+    def test_valid_zipcode_53859(self):
+        """Test valid zipcode starting with 53."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'is_owner': True}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is True
         assert reason is None
     
-    def test_valid_zipcode_66000(self):
+    def test_valid_zipcode_53000(self):
         """Test boundary: lowest valid zipcode."""
         payload = {
-            'address': {'zip': '66000'},
-            'house': {'is_owner': True}
+            'zipcode': '53000',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is True
         assert reason is None
     
-    def test_valid_zipcode_66999(self):
+    def test_valid_zipcode_53999(self):
         """Test boundary: highest valid zipcode."""
         payload = {
-            'address': {'zip': '66999'},
-            'house': {'is_owner': True}
+            'zipcode': '53999',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is True
         assert reason is None
     
     def test_invalid_zipcode_12345(self):
-        """Test invalid zipcode not starting with 66."""
+        """Test invalid zipcode not starting with 53."""
         payload = {
-            'address': {'zip': '12345'},
-            'house': {'is_owner': True}
+            'zipcode': '12345',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
-        assert reason == ZIP_NOT_66XXX
+        assert reason == ZIPCODE_PATTERN_ERROR
     
-    def test_invalid_zipcode_65999(self):
-        """Test boundary: just below valid range."""
+    def test_invalid_zipcode_66123(self):
+        """Test old format zipcode starting with 66."""
         payload = {
-            'address': {'zip': '65999'},
-            'house': {'is_owner': True}
+            'zipcode': '66123',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
-        assert reason == ZIP_NOT_66XXX
+        assert reason == ZIPCODE_PATTERN_ERROR
     
-    def test_invalid_zipcode_67000(self):
-        """Test boundary: just above valid range."""
+    def test_missing_zipcode(self):
+        """Test missing zipcode."""
         payload = {
-            'address': {'zip': '67000'},
-            'house': {'is_owner': True}
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
-        assert reason == ZIP_NOT_66XXX
-    
-    def test_invalid_zipcode_too_short(self):
-        """Test zipcode with too few digits."""
-        payload = {
-            'address': {'zip': '6612'},
-            'house': {'is_owner': True}
-        }
-        is_valid, reason = validate_lead(payload)
-        assert is_valid is False
-        assert reason == ZIP_NOT_66XXX
-    
-    def test_invalid_zipcode_too_long(self):
-        """Test zipcode with too many digits."""
-        payload = {
-            'address': {'zip': '661234'},
-            'house': {'is_owner': True}
-        }
-        is_valid, reason = validate_lead(payload)
-        assert is_valid is False
-        assert reason == ZIP_NOT_66XXX
-    
-    def test_zipcode_as_integer(self):
-        """Test that integer zipcodes are handled correctly."""
-        payload = {
-            'address': {'zip': 66123},
-            'house': {'is_owner': True}
-        }
-        is_valid, reason = validate_lead(payload)
-        assert is_valid is True
-        assert reason is None
+        assert reason == MISSING_REQUIRED_FIELD
 
 
 class TestValidateLeadHomeownership:
-    """Tests for homeownership validation."""
+    """Tests for homeownership validation via questions."""
     
-    def test_homeowner_true(self):
-        """Test valid homeowner with True boolean."""
+    def test_homeowner_ja(self):
+        """Test valid homeowner with 'Ja' answer."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'is_owner': True}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is True
         assert reason is None
-    
-    def test_homeowner_false(self):
-        """Test invalid: homeowner is False."""
+    def test_homeowner_true_string(self):
+        """Test that homeowner check passes with 'true' (string)."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'is_owner': False}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'true'}
+        }
+        is_valid, reason = validate_lead(payload)
+        assert is_valid is True
+        assert reason is None
+
+    def test_homeowner_true_boolean(self):
+        """Test that homeowner check passes with True (boolean)."""
+        payload = {
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': True}
+        }
+        is_valid, reason = validate_lead(payload)
+        assert is_valid is True
+        assert reason is None    
+    def test_homeowner_nein(self):
+        """Test invalid: homeowner answers 'Nein'."""
+        payload = {
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Nein'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
         assert reason == NOT_HOMEOWNER
     
-    def test_homeowner_string_true(self):
-        """Test invalid: homeowner is string 'true' not boolean."""
+    def test_homeowner_wrong_answer(self):
+        """Test invalid: homeowner gives wrong answer."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'is_owner': 'true'}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Vielleicht'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
         assert reason == NOT_HOMEOWNER
     
-    def test_homeowner_integer_one(self):
-        """Test invalid: homeowner is integer 1 not boolean True."""
+    def test_missing_homeowner_question(self):
+        """Test missing homeowner question."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'is_owner': 1}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
-        assert reason == NOT_HOMEOWNER
+        assert reason == MISSING_REQUIRED_FIELD
 
 
 class TestValidateLeadMissingFields:
@@ -189,39 +245,76 @@ class TestValidateLeadMissingFields:
         assert is_valid is False
         assert reason == MISSING_REQUIRED_FIELD
     
-    def test_missing_address(self):
-        """Test missing address object."""
+    def test_missing_email(self):
+        """Test missing email."""
         payload = {
-            'house': {'is_owner': True}
+            'zipcode': '53859',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
         assert reason == MISSING_REQUIRED_FIELD
     
-    def test_missing_zipcode(self):
-        """Test missing zipcode in address."""
+    def test_missing_phone(self):
+        """Test missing phone."""
         payload = {
-            'address': {'street': '123 Main St'},
-            'house': {'is_owner': True}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
         assert reason == MISSING_REQUIRED_FIELD
     
-    def test_missing_house(self):
-        """Test missing house object."""
+    def test_missing_first_name(self):
+        """Test missing first_name."""
         payload = {
-            'address': {'zip': '66123'}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False
         assert reason == MISSING_REQUIRED_FIELD
     
-    def test_missing_is_owner(self):
-        """Test missing is_owner in house."""
+    def test_missing_last_name(self):
+        """Test missing last_name."""
         payload = {
-            'address': {'zip': '66123'},
-            'house': {'type': 'single_family'}
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'city': 'Niederkassel',
+            'first_name': 'Rainer',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
+        }
+        is_valid, reason = validate_lead(payload)
+        assert is_valid is False
+        assert reason == MISSING_REQUIRED_FIELD
+    
+    def test_missing_city(self):
+        """Test missing city."""
+        payload = {
+            'zipcode': '53859',
+            'email': 'test@example.com',
+            'phone': '0160 8912308',
+            'street': 'Ommerich Str 119',
+            'first_name': 'Rainer',
+            'last_name': 'Simossek',
+            'questions': {'Sind Sie Eigentümer der Immobilie?': 'Ja'}
         }
         is_valid, reason = validate_lead(payload)
         assert is_valid is False

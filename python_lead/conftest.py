@@ -57,15 +57,31 @@ def pytest_configure(config):
 def valid_lead_payload():
     """Return a valid lead payload for testing."""
     return {
-        'email': 'test@example.com',
-        'phone': '+49123456789',
-        'address': {
-            'zip': '66123',
-            'street': '123 Main St'
+        'city': 'Niederkassel',
+        'email': 'rainer.simossek@t-online.de',
+        'phone': '0160 8912308',
+        'street': 'Ommerich Str 119',
+        'comment': '',
+        'zipcode': '53859',
+        'last_name': 'Simossek',
+        'lead_type': 'phone',
+        'first_name': 'Rainer',
+        'questions': {
+            'Dachfläche': '40',
+            'Dachgefälle': '45',
+            'Dachmaterial': 'Dachziegel',
+            'Finanzierung': 'Nicht sicher',
+            'Dachausrichtung': 'Süd/West',
+            'Wallbox gewünscht': 'Nein',
+            'Wie alt ist Ihr Dach?': 'Vor 1990',
+            'Stromspeicher gewünscht': 'Ja',
+            'Sind Sie Eigentümer der Immobilie?': 'Ja',
+            'Wann soll das Projekt gestartet werden?': '6',
+            'Welche Dachform haben Sie auf Ihrem Haus?': 'Satteldach',
+            'Wie hoch schätzen Sie ihren Stromverbrauch?': '5000',
+            'Wo möchten Sie die Solaranlage installieren?': 'Einfamilienhaus'
         },
-        'house': {
-            'is_owner': True
-        }
+        'created_at': 1751013978
     }
 
 
@@ -73,29 +89,35 @@ def valid_lead_payload():
 def invalid_zipcode_payload():
     """Return a payload with invalid zipcode."""
     return {
-        'email': 'test@example.com',
-        'phone': '+49123456789',
-        'address': {
-            'zip': '12345',
-            'street': '123 Main St'
-        },
-        'house': {
-            'is_owner': True
+        'city': 'Niederkassel',
+        'email': 'rainer.simossek@t-online.de',
+        'phone': '0160 8912308',
+        'street': 'Ommerich Str 119',
+        'comment': '',
+        'zipcode': '12345',  # Invalid: not 53XXX
+        'last_name': 'Simossek',
+        'lead_type': 'phone',
+        'first_name': 'Rainer',
+        'questions': {
+            'Sind Sie Eigentümer der Immobilie?': 'Ja'
         }
     }
 
 
 @pytest.fixture
 def non_homeowner_payload():
-    """Return a payload where house.is_owner is False."""
+    """Return a payload where homeowner answer is not 'Ja'."""
     return {
-        'email': 'test@example.com',
-        'phone': '+49123456789',
-        'address': {
-            'zip': '66123',
-            'street': '123 Main St'
-        },
-        'house': {
-            'is_owner': False
+        'city': 'Niederkassel',
+        'email': 'rainer.simossek@t-online.de',
+        'phone': '0160 8912308',
+        'street': 'Ommerich Str 119',
+        'comment': '',
+        'zipcode': '53859',
+        'last_name': 'Simossek',
+        'lead_type': 'phone',
+        'first_name': 'Rainer',
+        'questions': {
+            'Sind Sie Eigentümer der Immobilie?': 'Nein'  # Invalid
         }
     }
